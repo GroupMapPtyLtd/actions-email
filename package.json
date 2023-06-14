@@ -1,5 +1,5 @@
 {
-  "name": "action-send-an-email",
+  "name": "actions-email",
   "version": "1.0.0",
   "description": "Send an Email through GitHub Actions",
   "main": "dist/main.js",
