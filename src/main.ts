@@ -14,7 +14,7 @@ async function run() {
   
   if (emailTemplateID !== ''){
     sgMail.setApiKey(SENDGRID_API_KEY);
-    var msg = {
+    let msg: any = {
       to: { email :emailToAddress , name: ''},
       from: { email :emailFromAddress , name: ''},
       templateId: emailTemplateID,
@@ -27,14 +27,14 @@ async function run() {
       core.debug('Email Send Status Code ' + resultEmail.statusCode);
       core.setOutput('Email Send Status Code', resultEmail.statusCode);
     })
-    .catch((e) => {
+    .catch((e: any) => {
         console.log(e);
     })
     return resultEmail;
   }
   else{
     sgMail.setApiKey(SENDGRID_API_KEY);
-    var msg = {
+    let msg: any = {
       to: { email :emailToAddress , name: ''},
       from: { email :emailFromAddress , name: ''},
       html: emailBody,
@@ -47,7 +47,7 @@ async function run() {
       core.debug('Email Send Status Code ' + resultEmail.statusCode);
       core.setOutput('Email Send Status Code', resultEmail.statusCode);
     })
-    .catch((e) => {
+    .catch((e: any) => {
         console.log(e);
     })
     return resultEmail;
@@ -57,9 +57,9 @@ async function run() {
 async function execute() {
   try {
     return await run();
-  } catch({ message }) {
-    core.error('Failed to send message', message);
-    core.setFailed(message);
+  } catch(e) {
+    core.error('Failed to send message', (e as any).message);
+    core.setFailed((e as any).message);
   }
 }
 

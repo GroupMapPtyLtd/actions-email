@@ -1,31 +1,63 @@
 "use strict";
 const core = require('@actions/core');
-const twilio = require('twilio');
+const sendgrid = require('sendgrid');
+const sgMail = require('@sendgrid/mail');
 async function run() {
-    const from = core.getInput('fromPhoneNumber');
-    const to = core.getInput('toPhoneNumber');
-    const message = core.getInput('message');
-    const accountSid = core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID;
-    const apiKey = core.getInput('TWILIO_API_KEY') || process.env.TWILIO_API_KEY;
-    const apiSecret = core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET;
-    core.debug('Sending SMS');
-    const client = twilio(apiKey, apiSecret, { accountSid });
-    const resultMessage = await client.messages.create({
-        from,
-        to,
-        body: message,
-    });
-    core.debug('SMS sent!');
-    core.setOutput('messageSid', resultMessage.sid);
-    return resultMessage;
+    const emailToAddress = core.getInput('emailToAddress');
+    const emailFromAddress = core.getInput('emailFromAddress');
+    const emailBody = core.getInput('emailBody');
+    const emailTemplateID = core.getInput('emailTemplateID') || process.env.emailTemplateID;
+    const unSubscribeGroupID = core.getInput('unSubscribeGroupID') || process.env.unSubscribeGroupID;
+    const SENDGRID_API_KEY = core.getInput('SENDGRID_API_KEY') || process.env.SENDGRID_API_KEY;
+    core.debug('Getting Read to Send the Email');
+    if (emailTemplateID !== '') {
+        sgMail.setApiKey(SENDGRID_API_KEY);
+        let msg = {
+            to: { email: emailToAddress, name: '' },
+            from: { email: emailFromAddress, name: '' },
+            templateId: emailTemplateID,
+            asm: {
+                group_id: unSubscribeGroupID
+            },
+        };
+        const resultEmail = await sgMail.send(msg)
+            .then(() => {
+            core.debug('Email Send Status Code ' + resultEmail.statusCode);
+            core.setOutput('Email Send Status Code', resultEmail.statusCode);
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+        return resultEmail;
+    }
+    else {
+        sgMail.setApiKey(SENDGRID_API_KEY);
+        let msg = {
+            to: { email: emailToAddress, name: '' },
+            from: { email: emailFromAddress, name: '' },
+            html: emailBody,
+            asm: {
+                group_id: unSubscribeGroupID
+            },
+        };
+        const resultEmail = await sgMail.send(msg)
+            .then(() => {
+            core.debug('Email Send Status Code ' + resultEmail.statusCode);
+            core.setOutput('Email Send Status Code', resultEmail.statusCode);
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+        return resultEmail;
+    }
 }
 async function execute() {
     try {
         return await run();
     }
-    catch ({ message }) {
-        core.error('Failed to send message', message);
-        core.setFailed(message);
+    catch (e) {
+        core.error('Failed to send message', e.message);
+        core.setFailed(e.message);
     }
 }
 module.exports = execute;
