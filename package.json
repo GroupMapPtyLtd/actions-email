@@ -31,5 +31,11 @@
     "husky": "^3.0.5",
     "jest": "^25.1.0",
     "typescript": "^3.6.3"
+  },
+  "husky": {
+    "skipCI": true,
+    "hooks": {
+      "post-commit": "npm prune --production && git add node_modules/* && git commit -m \"chore: update node_modules\" && npm install"
+    }
   }
 }
